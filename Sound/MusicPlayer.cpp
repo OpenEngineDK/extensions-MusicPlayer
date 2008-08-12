@@ -16,7 +16,7 @@ MusicPlayer::~MusicPlayer() {
 
 }
 
-ISound* MusicPlayer::GetBackGroundSound(int id) {
+IMonoSound* MusicPlayer::GetBackGroundSound(int id) {
 	return backgroundlist.at(id);
 }
 
@@ -27,7 +27,7 @@ void MusicPlayer::SetCurrentBackgroundSound(int id) {
 int MusicPlayer::AddBackGroundSound(string filename) {
 
 	ISoundResourcePtr backsoundres = ResourceManager<ISoundResource>::Create(filename);
-	ISound* backsound = system->CreateSound(backsoundres);
+	IMonoSound* backsound = system->CreateMonoSound(backsoundres);
 	backgroundlist.push_back(backsound);
 	nextid++;
 	return nextid;
@@ -52,7 +52,7 @@ void MusicPlayer::Process(const float deltaTime, const float percent) {
 
 	if (!backgroundlist.empty()) {
 
-		ISound* currentsound = backgroundlist.at(current);
+		IMonoSound* currentsound = backgroundlist.at(current);
 		
 		if (first) {
 

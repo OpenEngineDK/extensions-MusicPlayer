@@ -4,7 +4,7 @@
 
 #include <Core/IModule.h>
 #include <Display/Camera.h>
-#include <Sound/ISound.h>
+#include <Sound/IMonoSound.h>
 #include <Sound/ISoundSystem.h>
 #include <Resources/ISoundResource.h>
 #include <Resources/ResourceManager.h>
@@ -25,7 +25,7 @@ private:
 	bool first;
 	Camera* cam;
 	ISoundSystem* system;
-	vector<ISound*> backgroundlist;
+	vector<IMonoSound*> backgroundlist;
 
 public:
 	MusicPlayer(Camera* inicam, ISoundSystem* system);
@@ -33,7 +33,7 @@ public:
 
 	int AddBackGroundSound(string filename);
 	void RemoveBackGroundSound(int id);
-	ISound* GetBackGroundSound(int id);
+	IMonoSound* GetBackGroundSound(int id);
 
 	void SetCurrentBackgroundSound(int id);
 
