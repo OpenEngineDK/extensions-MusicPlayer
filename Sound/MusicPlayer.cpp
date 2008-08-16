@@ -82,15 +82,7 @@ ITransitionMode* MusicPlayer::GetTransitionMode() {
 	return tran;
 }
 
-void MusicPlayer::Initialize() {
-
-}
-
-void MusicPlayer::Deinitialize() {
-
-}
-
-void MusicPlayer::Process(const float deltaTime, const float percent) {
+void MusicPlayer::Handle(ProcessEventArg arg) {
 
 /*	if (!backgroundlist.empty()) {
 

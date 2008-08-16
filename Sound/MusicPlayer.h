@@ -2,7 +2,8 @@
 #ifndef _SOUND_MUSICPLAYER_H_
 #define _SOUND_MUSICPLAYER_H_
 
-#include <Core/IModule.h>
+#include <Core/IListener.h>
+#include <Core/EngineEvents.h>
 #include <Display/Camera.h>
 #include <Sound/ISound.h>
 #include <Sound/ISoundSystem.h>
@@ -14,12 +15,13 @@
 namespace OpenEngine {
 namespace Sound {
 
-using OpenEngine::Core::IModule;
+using OpenEngine::Core::IListener;
+using OpenEngine::Core::ProcessEventArg;
 using OpenEngine::Display::Camera;
 using namespace OpenEngine::Scene;
 using namespace std;
 
-class MusicPlayer : public IModule {
+class MusicPlayer : public IListener<ProcessEventArg> {
 
 private:
 	int current;
@@ -48,9 +50,7 @@ public:
 	void SetTransitionMode(ITransitionMode* newtran);
 	ITransitionMode* GetTransitionMode();
 
-	void Initialize();
-    void Process(const float deltaTime, const float percent);
-    void Deinitialize();
+	void Handle(ProcessEventArg arg);
 	
 	bool IsTypeOf(const std::type_info& inf) { 
         return typeid(MusicPlayer) == inf; 
