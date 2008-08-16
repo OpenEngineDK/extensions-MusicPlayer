@@ -15,13 +15,15 @@ private:
 	ISound* fromsound;
 	ISound* tosound;
 	bool done;
+	float myintime;
 
 public:
 	BruteTransitionMode();
 	~BruteTransitionMode();
 	void initfade(ISound* from, ISound* to, float intime, float outtime);
-	void process(float starttime, float deltatime);
+	void process(float deltatime);
 	bool isDone();
+        float GetInTime();
 
 };
 

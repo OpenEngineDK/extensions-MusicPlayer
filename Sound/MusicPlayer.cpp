@@ -1,5 +1,7 @@
 
 #include <Sound/MusicPlayer.h>
+#include <Sound/BruteTransitionMode.h>
+#include <Sound/IMonoSound.h>
 
 namespace OpenEngine {
 namespace Sound {
@@ -8,10 +10,9 @@ MusicPlayer::MusicPlayer(Camera* inicam, ISoundSystem* inisystem) {
 	cam = inicam;
 	system = inisystem;
 	current = 0;
-	first = true;
 	random = false;
 	stopped = true;
-	//tran =
+	tran = new BruteTransitionMode();
 }
 
 MusicPlayer::~MusicPlayer() {
@@ -71,7 +72,7 @@ void MusicPlayer::Suffle() {
 }
 
 void MusicPlayer::Fade(int fromtracknumber, int totracknumber, float intime, float outtime) {
-
+        
 }
 
 void MusicPlayer::SetTransitionMode(ITransitionMode* newtran) {
@@ -84,17 +85,29 @@ ITransitionMode* MusicPlayer::GetTransitionMode() {
 
 void MusicPlayer::Handle(ProcessEventArg arg) {
 
-/*	if (!backgroundlist.empty()) {
+	if (!backgroundlist.empty() || stopped) {
 
-		IMonoSound* currentsound = backgroundlist.at(current);
+		ISound* currentsound = backgroundlist.at(current);		
 		
-		if (first) {
+		if (!(tran->isDone())) {
+		  int curtime = (mytime.GetTime()).AsInt();
+		  tran->process(curtime-starttime);
+		}
+		else {
 
-			first = false;
-			currentsound->Play();
+		  if (typeid(currentsound) == typeid(IMonoSound)) {
+
+		    IMonoSound* cursound = (IMonoSound*) currentsound;
+
+		    //		    if (cursound)
+
+		  }
 
 		}
-		else if (currentsound->GetPlaybackState() == ISound::STOPPED) {
+
+
+
+		/*		else if (currentsound->GetPlaybackState() == ISound::STOPPED) {
 	
 			current++;
 			if (current == backgroundlist.size())
@@ -105,9 +118,9 @@ void MusicPlayer::Handle(ProcessEventArg arg) {
 		}
 
 		Vector<3, float> pos = cam->GetPosition();
-		currentsound->SetPosition(pos);
+		currentsound->SetPosition(pos);*/
 
-	}*/
+	}
 
 }
 

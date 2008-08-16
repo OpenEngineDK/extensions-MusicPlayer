@@ -11,6 +11,7 @@
 #include <Resources/ResourceManager.h>
 #include <vector>
 #include <Sound/ITransitionMode.h>
+#include <Utils/Timer.h>
 
 namespace OpenEngine {
 namespace Sound {
@@ -18,6 +19,7 @@ namespace Sound {
 using OpenEngine::Core::IListener;
 using OpenEngine::Core::ProcessEventArg;
 using OpenEngine::Display::Camera;
+using namespace OpenEngine::Utils;
 using namespace OpenEngine::Scene;
 using namespace std;
 
@@ -25,11 +27,13 @@ class MusicPlayer : public IListener<ProcessEventArg> {
 
 private:
 	int current;
-	bool first, random, stopped;
+	bool random, stopped;
 	Camera* cam;
 	ISoundSystem* system;
 	vector<ISound*> backgroundlist;
 	ITransitionMode* tran;
+	int starttime;
+	Timer mytime;
 
 public:
 	MusicPlayer(Camera* inicam, ISoundSystem* system);
