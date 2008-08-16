@@ -8,36 +8,78 @@ MusicPlayer::MusicPlayer(Camera* inicam, ISoundSystem* inisystem) {
 	cam = inicam;
 	system = inisystem;
 	current = 0;
-	nextid = -1;
 	first = true;
+	random = false;
+	stopped = true;
+	//tran =
 }
 
 MusicPlayer::~MusicPlayer() {
 
 }
 
-IMonoSound* MusicPlayer::GetBackGroundSound(int id) {
-	return backgroundlist.at(id);
-}
-
-void MusicPlayer::SetCurrentBackgroundSound(int id) {
-	current = id;
-}
-
-int MusicPlayer::AddBackGroundSound(string filename) {
+void MusicPlayer::AddMonoBackGroundSound(string filename) {
 
 	ISoundResourcePtr backsoundres = ResourceManager<ISoundResource>::Create(filename);
-	IMonoSound* backsound = system->CreateMonoSound(backsoundres);
+	ISound* backsound = (ISound*) system->CreateMonoSound(backsoundres);
 	backgroundlist.push_back(backsound);
-	nextid++;
-	return nextid;
 
 }
 
-void MusicPlayer::RemoveBackGroundSound(int id) {
+void MusicPlayer::AddStereoBackGroundSound(string filename) {
 
-	backgroundlist.erase(backgroundlist.begin()+id,backgroundlist.begin()+id+1);
+	ISoundResourcePtr backsoundres = ResourceManager<ISoundResource>::Create(filename);
+	ISound* backsound = (ISound*) system->CreateStereoSound(backsoundres);
+	backgroundlist.push_back(backsound);
 
+}
+
+void MusicPlayer::RemoveBackGroundSound(int tracknumber) {
+
+	backgroundlist.erase(backgroundlist.begin()+tracknumber,backgroundlist.begin()+tracknumber+1);
+
+}
+	
+ISound* MusicPlayer::GetBackGroundSound(int tracknumber) {
+	return backgroundlist.at(tracknumber);
+}
+
+void MusicPlayer::Next() {
+
+}
+
+void MusicPlayer::SwitchTo(int tracknumber) {
+
+}
+
+void MusicPlayer::Play() {
+	(backgroundlist.at(current))->Play();
+	stopped = false;
+}
+
+void MusicPlayer::Stop() {
+	(backgroundlist.at(current))->Stop();
+	stopped = true;
+}
+
+void MusicPlayer::Pause() {
+	(backgroundlist.at(current))->Pause();
+}
+
+void MusicPlayer::Suffle() {
+	random = !random;
+}
+
+void MusicPlayer::Fade(int fromtracknumber, int totracknumber, float intime, float outtime) {
+
+}
+
+void MusicPlayer::SetTransitionMode(ITransitionMode* newtran) {
+	tran = newtran;
+}
+
+ITransitionMode* MusicPlayer::GetTransitionMode() {
+	return tran;
 }
 
 void MusicPlayer::Initialize() {
@@ -50,7 +92,7 @@ void MusicPlayer::Deinitialize() {
 
 void MusicPlayer::Process(const float deltaTime, const float percent) {
 
-	if (!backgroundlist.empty()) {
+/*	if (!backgroundlist.empty()) {
 
 		IMonoSound* currentsound = backgroundlist.at(current);
 		
@@ -73,7 +115,7 @@ void MusicPlayer::Process(const float deltaTime, const float percent) {
 		Vector<3, float> pos = cam->GetPosition();
 		currentsound->SetPosition(pos);
 
-	}
+	}*/
 
 }
 
