@@ -60,10 +60,6 @@ public:
 	ITransitionMode* GetTransitionMode();
 
 	void Handle(ProcessEventArg arg);
-	
-	bool IsTypeOf(const std::type_info& inf) { 
-        return typeid(MusicPlayer) == inf; 
-    }
 };
 
 } // NS Sound

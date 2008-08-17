@@ -3,7 +3,7 @@
 #include <Sound/BruteTransitionMode.h>
 #include <Sound/IMonoSound.h>
 #include <Sound/IStereoSound.h>
-#include <typeinfo.h>
+#include <typeinfo>
 
 namespace OpenEngine {
 namespace Sound {
