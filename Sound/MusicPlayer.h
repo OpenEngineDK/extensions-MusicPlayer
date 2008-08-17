@@ -37,6 +37,8 @@ private:
 	IMonoSound* monoreftype;
 	IStereoSound* stereoreftype;
 
+	void RandomNext();
+
 public:
 	MusicPlayer(Camera* inicam, ISoundSystem* system);
 	~MusicPlayer();

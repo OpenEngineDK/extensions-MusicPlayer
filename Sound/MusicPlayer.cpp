@@ -8,6 +8,19 @@
 namespace OpenEngine {
 namespace Sound {
 
+void MusicPlayer::RandomNext() {
+
+    previous = current;
+
+    current = (rand())%(backgroundlist.size());
+    if (current == backgroundlist.size()) 
+        current = 0;
+
+    tran->InitFade(backgroundlist.at(previous), backgroundlist.at(current));
+    tran->Start();    
+
+}
+
 MusicPlayer::MusicPlayer(Camera* inicam, ISoundSystem* inisystem) {
 	cam = inicam;
 	system = inisystem;
@@ -153,7 +166,11 @@ void MusicPlayer::Handle(ProcessEventArg arg) {
 	    if (timeleft <= tran->GetInTime()) {
 
 	        starttime = (mytime->GetTime()).AsInt32();
-		Next();
+
+		if (random)
+		  RandomNext();
+		else
+		  Next();
 	    }
 
 	}
