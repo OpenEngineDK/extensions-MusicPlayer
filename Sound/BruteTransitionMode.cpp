@@ -4,35 +4,52 @@
 namespace OpenEngine {
 namespace Sound {
 
-BruteTransitionMode::BruteTransitionMode() {
-	done = true;
+BruteTransitionMode::BruteTransitionMode(float newintime, float newoutime) {
+    intime = newintime;
+    outtime = newoutime;
+    done = true;
 }
 
 BruteTransitionMode::~BruteTransitionMode() {
 }
 
-void BruteTransitionMode::initfade(ISound* from, ISound* to, float intime, float outtime) {
+void BruteTransitionMode::InitFade(ISound* from, ISound* to) {
 	fromsound = from;
 	tosound = to;
-	done = false;
-	myintime = intime;
+}
+
+void BruteTransitionMode::SetInTime(float newintime) {
+    intime = newintime;
+}
+
+float BruteTransitionMode::GetInTime() {
+    return intime;
+}
+
+void BruteTransitionMode::SetOutTime(float newouttime) {
+    outtime = newouttime;
 }
 	
+float BruteTransitionMode::GetOutTime() {
+    return outtime;
+}
+
 void BruteTransitionMode::process(float deltatime) {
-  if (deltatime >= myintime) {
+  if (deltatime >= intime) {
 	fromsound->Stop();
 	tosound->Play();
 	done = true;
   }
+
 }
 
 bool BruteTransitionMode::isDone() {
 	return done;
 }
 
-float BruteTransitionMode::GetInTime() {
-
-  return myintime;
+void BruteTransitionMode::Start() {
+  
+    done = false;
 
 }
 

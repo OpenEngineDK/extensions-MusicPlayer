@@ -26,14 +26,16 @@ using namespace std;
 class MusicPlayer : public IListener<ProcessEventArg> {
 
 private:
-	int current;
+	int current, previous;
 	bool random, stopped;
 	Camera* cam;
 	ISoundSystem* system;
 	vector<ISound*> backgroundlist;
 	ITransitionMode* tran;
 	int starttime;
-	Timer mytime;
+	Timer* mytime;
+	IMonoSound* monoreftype;
+	IStereoSound* stereoreftype;
 
 public:
 	MusicPlayer(Camera* inicam, ISoundSystem* system);
@@ -44,6 +46,7 @@ public:
 	void RemoveBackGroundSound(int tracknumber);
 	ISound* GetBackGroundSound(int tracknumber);
 
+	void Previous();
 	void Next();
 	void SwitchTo(int tracknumber);
 	void Play();
