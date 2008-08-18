@@ -26,6 +26,7 @@ using namespace std;
 class MusicPlayer : public IListener<ProcessEventArg> {
 
 private:
+    float gain;
 	int current, previous;
 	bool random, stopped;
 	Camera* cam;
@@ -54,10 +55,12 @@ public:
 	void Play();
 	void Stop();
 	void Pause();
-	void Suffle();
+	void Shuffle();
 	void Fade(int fromtracknumber, int totracknumber, float intime, float outtime);
 	void SetTransitionMode(ITransitionMode* newtran);
 	ITransitionMode* GetTransitionMode();
+    void SetGain(float gain);
+    float GetGain();
 
 	void Handle(ProcessEventArg arg);
 };

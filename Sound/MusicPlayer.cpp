@@ -8,11 +8,30 @@
 namespace OpenEngine {
 namespace Sound {
 
-void MusicPlayer::RandomNext() {
-
+void MusicPlayer::SetGain(float gain) {
+    this->gain = gain;
+    if (this->gain < 0) 
+        this->gain = 0;
     previous = current;
+    
+    for (vector<ISound*>::iterator itr = backgroundlist.begin();
+         itr != backgroundlist.end();
+         itr++) {
+        (*itr)->SetGain(this->gain);
+    }
+}
 
-    current = (rand())%(backgroundlist.size());
+float MusicPlayer::GetGain() {
+    return gain;
+}
+
+
+void MusicPlayer::RandomNext() {
+    
+    previous = current;
+    srand(time(NULL));
+    current = (int((rand()/(float)RAND_MAX)*backgroundlist.size()));
+    logger.info << "current " << current << logger.end;
     if (current == backgroundlist.size()) 
         current = 0;
 
@@ -32,6 +51,7 @@ MusicPlayer::MusicPlayer(Camera* inicam, ISoundSystem* inisystem) {
 	mytime = new Timer();
 	monoreftype = NULL;
 	stereoreftype = NULL;
+    gain = 1.0;
 }
 
 MusicPlayer::~MusicPlayer() {
@@ -43,6 +63,7 @@ void MusicPlayer::AddMonoBackGroundSound(string filename) {
 	ISoundResourcePtr backsoundres = ResourceManager<ISoundResource>::Create(filename);
 	monoreftype = system->CreateMonoSound(backsoundres);
 	backgroundlist.push_back((ISound*) monoreftype);
+    monoreftype->SetGain(gain);
 
 }
 
@@ -51,7 +72,7 @@ void MusicPlayer::AddStereoBackGroundSound(string filename) {
 	ISoundResourcePtr backsoundres = ResourceManager<ISoundResource>::Create(filename);
 	stereoreftype = system->CreateStereoSound(backsoundres);
 	backgroundlist.push_back((ISound*) stereoreftype);
-
+    stereoreftype->SetGain(gain);
 }
 
 void MusicPlayer::RemoveBackGroundSound(int tracknumber) {
@@ -78,6 +99,10 @@ void MusicPlayer::Previous() {
 }
 
 void MusicPlayer::Next() {
+    if (random) {
+        RandomNext();
+        return;
+    }
 
     previous = current;
 
@@ -112,7 +137,7 @@ void MusicPlayer::Pause() {
 }
 
   //TODO make this count
-void MusicPlayer::Suffle() {
+void MusicPlayer::Shuffle() {
     random = !random;
 }
 
