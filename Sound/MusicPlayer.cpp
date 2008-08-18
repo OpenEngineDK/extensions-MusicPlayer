@@ -31,7 +31,7 @@ void MusicPlayer::RandomNext() {
     previous = current;
     srand(time(NULL));
     current = (int((rand()/(float)RAND_MAX)*backgroundlist.size()));
-    logger.info << "current " << current << logger.end;
+    
     if (current == backgroundlist.size()) 
         current = 0;
 
