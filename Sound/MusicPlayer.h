@@ -27,7 +27,7 @@ class MusicPlayer : public IListener<ProcessEventArg> {
 
 private:
     float gain;
-	int current, previous;
+	unsigned int current, previous;
 	bool random, stopped;
 	Camera* cam;
 	ISoundSystem* system;

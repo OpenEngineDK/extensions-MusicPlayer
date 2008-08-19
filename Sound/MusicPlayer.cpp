@@ -89,9 +89,10 @@ void MusicPlayer::Previous() {
 
     previous = current;
 
-    current--;
-    if (current == -1) 
+    if (current == 0) 
         current = (backgroundlist.size())-1;
+    else
+        current--;
 
     tran->InitFade(backgroundlist.at(previous), backgroundlist.at(current));
     tran->Start();
