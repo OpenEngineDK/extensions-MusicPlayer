@@ -1,5 +1,5 @@
-
 #include <Sound/MusicPlayer.h>
+
 #include <Sound/BruteTransitionMode.h>
 #include <Sound/IMonoSound.h>
 #include <Sound/IStereoSound.h>
@@ -55,30 +55,27 @@ MusicPlayer::MusicPlayer(Camera* inicam, ISoundSystem* inisystem) {
 }
 
 MusicPlayer::~MusicPlayer() {
-
 }
 
 void MusicPlayer::AddMonoBackGroundSound(string filename) {
-
-	ISoundResourcePtr backsoundres = ResourceManager<ISoundResource>::Create(filename);
+	ISoundResourcePtr backsoundres =
+        ResourceManager<ISoundResource>::Create(filename);
 	monoreftype = system->CreateMonoSound(backsoundres);
 	backgroundlist.push_back((ISound*) monoreftype);
     monoreftype->SetGain(gain);
-
 }
 
 void MusicPlayer::AddStereoBackGroundSound(string filename) {
-
-	ISoundResourcePtr backsoundres = ResourceManager<ISoundResource>::Create(filename);
+	ISoundResourcePtr backsoundres =
+        ResourceManager<ISoundResource>::Create(filename);
 	stereoreftype = system->CreateStereoSound(backsoundres);
 	backgroundlist.push_back((ISound*) stereoreftype);
     stereoreftype->SetGain(gain);
 }
 
 void MusicPlayer::RemoveBackGroundSound(int tracknumber) {
-
-	backgroundlist.erase(backgroundlist.begin()+tracknumber,backgroundlist.begin()+tracknumber+1);
-
+	backgroundlist.erase(backgroundlist.begin()+tracknumber,
+                         backgroundlist.begin()+tracknumber+1);
 }
 	
 ISound* MusicPlayer::GetBackGroundSound(int tracknumber) {
@@ -86,7 +83,6 @@ ISound* MusicPlayer::GetBackGroundSound(int tracknumber) {
 }
 
 void MusicPlayer::Previous() {
-
     previous = current;
 
     if (current == 0) 
@@ -94,7 +90,8 @@ void MusicPlayer::Previous() {
     else
         current--;
 
-    tran->InitFade(backgroundlist.at(previous), backgroundlist.at(current));
+    tran->InitFade(backgroundlist.at(previous),
+                   backgroundlist.at(current));
     tran->Start();
 
 }
@@ -111,7 +108,8 @@ void MusicPlayer::Next() {
     if (current == backgroundlist.size()) 
         current = 0;
 
-    tran->InitFade(backgroundlist.at(previous), backgroundlist.at(current));
+    tran->InitFade(backgroundlist.at(previous),
+                   backgroundlist.at(current));
     tran->Start();    
 }
 
@@ -119,7 +117,8 @@ void MusicPlayer::SwitchTo(int tracknumber) {
     previous = current;
     current = tracknumber;
 
-    tran->InitFade(backgroundlist.at(previous), backgroundlist.at(current));
+    tran->InitFade(backgroundlist.at(previous),
+                   backgroundlist.at(current));
     tran->Start();
 }
 
@@ -142,8 +141,10 @@ void MusicPlayer::Shuffle() {
     random = !random;
 }
 
-void MusicPlayer::Fade(int fromtracknumber, int totracknumber, float newintime, float newouttime) {
-    tran->InitFade(backgroundlist.at(fromtracknumber), backgroundlist.at(totracknumber));
+void MusicPlayer::Fade(int fromtracknumber, int totracknumber,
+                       float newintime, float newouttime) {
+    tran->InitFade(backgroundlist.at(fromtracknumber), 
+                   backgroundlist.at(totracknumber));
     tran->SetInTime(newintime);
     tran->SetOutTime(newouttime);
     tran->Start();
@@ -158,89 +159,82 @@ ITransitionMode* MusicPlayer::GetTransitionMode() {
 }
 
 void MusicPlayer::Handle(ProcessEventArg arg) {
+    if (backgroundlist.empty()) return;
 
-    if (!backgroundlist.empty() || stopped) {
-
+    if(stopped) {
         ISound* currentsound = backgroundlist.at(current);
-	ISound* previoussound = backgroundlist.at(previous);
+        ISound* previoussound = backgroundlist.at(previous);
 
         if (!(tran->isDone())) {
-	    int curtime = (mytime->GetTime()).AsInt32();
-	    tran->process(curtime-starttime);
-	}
-	else {
+            int curtime = (mytime->GetTime()).AsInt32();
+            tran->process(curtime-starttime);
+        }
+        else {
+            float timeleft = 0.0;
+            
+            //set the timeleft right
+            if (monoreftype && (typeid(*currentsound).name() ==
+                                typeid(*monoreftype).name())) {
 
-	    float timeleft = 0.0;
-
-	    //set the timeleft right
-	    if (monoreftype && (typeid(*currentsound).name() ==  typeid(*monoreftype).name())) {
-
-	        IMonoSound* cursound = (IMonoSound*) currentsound;
-		timeleft = cursound->GetTotalLength()-cursound->GetTimeOffset();
-	
-	    }
-	    else {
-
-	        IStereoSound* cursound = (IStereoSound*) currentsound;
-		timeleft = ((cursound->GetLeft())->GetTotalLength()) - ((cursound->GetLeft())->GetTimeOffset());
-		float temp = ((cursound->GetRight())->GetTotalLength()) - ((cursound->GetRight())->GetTimeOffset());
-
-		if (temp < timeleft)
-		    timeleft = temp;
-	    }
-	      
-	    if (timeleft <= tran->GetInTime()) {
-
-	        starttime = (mytime->GetTime()).AsInt32();
-
-		if (random)
-		  RandomNext();
-		else
-		  Next();
-	    }
-
-	}
-
-	Vector<3, float> pos = cam->GetPosition();
-	
-	//set the position of the current
-	if (monoreftype && (typeid(*currentsound).name() ==  typeid(*monoreftype).name())) {
-
-	        IMonoSound* cursound = (IMonoSound*) currentsound;
+                IMonoSound* cursound = (IMonoSound*) currentsound;
+                timeleft = cursound->GetTotalLength()-cursound->GetTimeOffset();
+            }
+            else {
+                
+                IStereoSound* cursound = (IStereoSound*) currentsound;
+                timeleft = ((cursound->GetLeft())->GetTotalLength()) - 
+                    ((cursound->GetLeft())->GetTimeOffset());
+                float temp = ((cursound->GetRight())->GetTotalLength()) - 
+                    ((cursound->GetRight())->GetTimeOffset());
+                
+                if (temp < timeleft)
+                    timeleft = temp;
+            }
+            
+            if (timeleft <= tran->GetInTime()) {
+                starttime = (mytime->GetTime()).AsInt32();
+                if (random)
+                    RandomNext();
+                else
+                    Next();
+            }
+        }
+        
+        Vector<3, float> pos = cam->GetPosition();
+        
+        //set the position of the current
+        if (monoreftype && (typeid(*currentsound).name() ==  
+                            typeid(*monoreftype).name())) {
+        IMonoSound* cursound = (IMonoSound*) currentsound;
 		cursound->SetPosition(pos);
-	
-	}
-	else {
-
-	        IStereoSound* cursound = (IStereoSound*) currentsound;
-		IMonoSound* left = cursound->GetLeft();
-		IMonoSound* right = cursound->GetRight();
-		pos[0] = pos[0] - 1;
-		left->SetPosition(pos);
-		pos[0] = pos[0] + 1;
-		right->SetPosition(pos);
-	}
-	
-	//set the position of the old if initialize
-	if (monoreftype && (typeid(*previoussound).name() ==  typeid(*monoreftype).name())) {
-
-	    IMonoSound* presound = (IMonoSound*) previoussound;
-	    presound->SetPosition(pos);
-	
-	} 
-	else {
-	  
-	    IStereoSound* presound = (IStereoSound*) previoussound;
-	    IMonoSound* left = presound->GetLeft();
-	    IMonoSound* right = presound->GetRight();
-	    pos[0] = pos[0] - 1;
-	    left->SetPosition(pos);
-	    pos[0] = pos[0] + 1;
-	    right->SetPosition(pos);
-	}
-	
+        }
+        else {
+            IStereoSound* cursound = (IStereoSound*) currentsound;
+            IMonoSound* left = cursound->GetLeft();
+            IMonoSound* right = cursound->GetRight();
+            pos[0] = pos[0] - 1;
+            left->SetPosition(pos);
+            pos[0] = pos[0] + 1;
+            right->SetPosition(pos);
+        }
+        
+        //set the position of the old if initialize
+        if (monoreftype && (typeid(*previoussound).name() ==
+                            typeid(*monoreftype).name())) {
+            IMonoSound* presound = (IMonoSound*) previoussound;
+            presound->SetPosition(pos);
+        } 
+        else {
+            IStereoSound* presound = (IStereoSound*) previoussound;
+            IMonoSound* left = presound->GetLeft();
+            IMonoSound* right = presound->GetRight();
+            pos[0] = pos[0] - 1;
+            left->SetPosition(pos);
+            pos[0] = pos[0] + 1;
+            right->SetPosition(pos);
+        }
     }
 }
 
-}
-}
+} // NS Sound
+} // NS OpenEngine
