@@ -8,17 +8,48 @@
 namespace OpenEngine {
 namespace Sound {
 
+MusicPlayer::MusicPlayer(Camera* inicam, ISoundSystem* inisystem) {
+	cam = inicam;
+	system = inisystem;
+	current = nextTrackNumber = 0;
+	random = stalled = switchToNextNumber = false;
+	tran = new BruteTransitionMode(Time(0,0), Time(0,0));
+    gain = 1.0;
+
+    randGen = new RandomGenerator();
+    randGen->SeedWithTime();
+}
+
+MusicPlayer::~MusicPlayer() {
+}
+
+void MusicPlayer::AddSound(string filename) {
+	ISoundResourcePtr resource =
+        ResourceManager<ISoundResource>::Create(filename);
+	ISound* sound = system->CreateSound(resource);
+	playlist.push_back((ISound*) sound);
+    sound->SetGain(gain);
+
+    // if we are playing the last number and insert a new
+    // one, then update which number should be next
+    nextTrackNumber = NextNumber();
+
+    //@todo: set the sound to be relative to the listener i openal
+}
+
 void MusicPlayer::SetGain(float gain) {
-    this->gain = gain;
-    if (this->gain < 0) 
-        this->gain = 0;
-    previous = current;
+    //@todo: is this done right? I think there is a main gain!
+    // maybe check all other methods for this error!!!
+
+    if (gain < 0) gain = 0;
+    else if (gain > 1) gain = 1;
     
-    for (vector<ISound*>::iterator itr = backgroundlist.begin();
-         itr != backgroundlist.end();
-         itr++) {
-        (*itr)->SetGain(this->gain);
+    for (vector<ISound*>::iterator itr = playlist.begin();
+         itr != playlist.end(); itr++) {
+        (*itr)->SetGain(gain);
     }
+
+    this->gain = gain;
 }
 
 float MusicPlayer::GetGain() {
@@ -26,182 +57,107 @@ float MusicPlayer::GetGain() {
 }
 
 
-void MusicPlayer::RandomNext() {
-    
-    previous = current;
-    srand(time(NULL));
-    current = (int((rand()/(float)RAND_MAX)*backgroundlist.size()));
-    
-    if (current == backgroundlist.size()) 
-        current = 0;
-
-    tran->InitFade(backgroundlist.at(previous), backgroundlist.at(current));
-    tran->Start();    
-
+unsigned int MusicPlayer::RandomNumber() {
+    unsigned int switchTo = randGen->UniformInt(0,NumberOfTracks()-1);
+    if (switchTo == current && NumberOfTracks() > 1)
+        return NextNumber();
+    return switchTo;
 }
 
-MusicPlayer::MusicPlayer(Camera* inicam, ISoundSystem* inisystem) {
-	cam = inicam;
-	system = inisystem;
-	current = 0;
-	previous = 0;
-	random = false;
-	stopped = true;
-	tran = new BruteTransitionMode(0.0, 0.0);
-	mytime = new Timer();
-	monoreftype = NULL;
-	stereoreftype = NULL;
-    gain = 1.0;
-}
-
-MusicPlayer::~MusicPlayer() {
-}
-
-void MusicPlayer::AddMonoBackGroundSound(string filename) {
-	ISoundResourcePtr backsoundres =
-        ResourceManager<ISoundResource>::Create(filename);
-	monoreftype = system->CreateMonoSound(backsoundres);
-	backgroundlist.push_back((ISound*) monoreftype);
-    monoreftype->SetGain(gain);
-}
-
-void MusicPlayer::AddStereoBackGroundSound(string filename) {
-	ISoundResourcePtr backsoundres =
-        ResourceManager<ISoundResource>::Create(filename);
-	stereoreftype = system->CreateStereoSound(backsoundres);
-	backgroundlist.push_back((ISound*) stereoreftype);
-    stereoreftype->SetGain(gain);
-}
-
-void MusicPlayer::RemoveBackGroundSound(int tracknumber) {
-	backgroundlist.erase(backgroundlist.begin()+tracknumber,
-                         backgroundlist.begin()+tracknumber+1);
-}
-	
-ISound* MusicPlayer::GetBackGroundSound(int tracknumber) {
-	return backgroundlist.at(tracknumber);
-}
-
-void MusicPlayer::Previous() {
-    previous = current;
-
+unsigned int MusicPlayer::PreviousNumber() {
     if (current == 0) 
-        current = (backgroundlist.size())-1;
+        return NumberOfTracks()-1;
     else
-        current--;
+        return current-1;
+}
 
-    tran->InitFade(backgroundlist.at(previous),
-                   backgroundlist.at(current));
-    tran->Start();
+unsigned int MusicPlayer::NextNumber() {
+    unsigned int switchTo = current+1;
+    return switchTo %= NumberOfTracks();
+}
 
+void MusicPlayer::Previous() { 
+    if (random)
+        SwitchTo(RandomNumber());
+    else
+        SwitchTo(PreviousNumber());
 }
 
 void MusicPlayer::Next() {
-    if (random) {
-        RandomNext();
-        return;
-    }
-
-    previous = current;
-
-    current++;
-    if (current == backgroundlist.size()) 
-        current = 0;
-
-    tran->InitFade(backgroundlist.at(previous),
-                   backgroundlist.at(current));
-    tran->Start();    
+    if (random)
+        SwitchTo(RandomNumber());
+    else
+        SwitchTo(NextNumber());
 }
 
-void MusicPlayer::SwitchTo(int tracknumber) {
-    previous = current;
-    current = tracknumber;
+void MusicPlayer::SwitchTo(unsigned int trackNumber) {
+    if (playlist.at(current)->IsPlaying()) {
+        nextTrackNumber = trackNumber;
+        switchToNextNumber = true;
+    }
+    else {
+        current = trackNumber;
+        nextTrackNumber = NextNumber();
+    }
+    logger.info << "Switching to song number: " << trackNumber+1;
+    logger.info << " out of " << NumberOfTracks() << logger.end;
+}
 
-    tran->InitFade(backgroundlist.at(previous),
-                   backgroundlist.at(current));
-    tran->Start();
+unsigned int MusicPlayer::NumberOfTracks() {
+    return playlist.size();
 }
 
 void MusicPlayer::Play() {
-    (backgroundlist.at(current))->Play();
-    stopped = false;
+    (playlist.at(current))->Play();
+    stalled = false;
 }
 
 void MusicPlayer::Stop() {
-    (backgroundlist.at(current))->Stop();
-    stopped = true;
+    (playlist.at(current))->Stop();
+    stalled = true;
 }
 
 void MusicPlayer::Pause() {
-    (backgroundlist.at(current))->Pause();
+    (playlist.at(current))->Pause();
+    //stalled = true;
 }
 
-  //TODO make this count
-void MusicPlayer::Shuffle() {
-    random = !random;
+void MusicPlayer::Shuffle(bool shuffle) {
+    random = shuffle;
 }
 
-void MusicPlayer::Fade(int fromtracknumber, int totracknumber,
-                       float newintime, float newouttime) {
-    tran->InitFade(backgroundlist.at(fromtracknumber), 
-                   backgroundlist.at(totracknumber));
-    tran->SetInTime(newintime);
-    tran->SetOutTime(newouttime);
-    tran->Start();
-}
-
-void MusicPlayer::SetTransitionMode(ITransitionMode* newtran) {
-    tran = newtran;
-}
-
-ITransitionMode* MusicPlayer::GetTransitionMode() {
-    return tran;
+void MusicPlayer::SetTransitionMode(ITransitionMode* transitionMode) {
+    tran = transitionMode;
 }
 
 void MusicPlayer::Handle(ProcessEventArg arg) {
-    if (backgroundlist.empty()) return;
+    if (!playlist.empty() && !stalled) {
 
-    if(stopped) {
-        ISound* currentsound = backgroundlist.at(current);
-        ISound* previoussound = backgroundlist.at(previous);
+        ISound* currentSound = playlist.at(current);
 
-        if (!(tran->isDone())) {
-            int curtime = (mytime->GetTime()).AsInt32();
-            tran->process(curtime-starttime);
+//         logger.info << "time left: " << 
+//             currentSound->GetTimeLeft().ToString() << logger.end;
+
+        if(currentSound->GetTimeLeft() <= tran->GetInTime()) {
+            if (switchToNextNumber == false) Next();
+            switchToNextNumber = true;
         }
-        else {
-            float timeleft = 0.0;
-            
-            //set the timeleft right
-            if (monoreftype && (typeid(*currentsound).name() ==
-                                typeid(*monoreftype).name())) {
 
-                IMonoSound* cursound = (IMonoSound*) currentsound;
-                timeleft = cursound->GetTotalLength()-cursound->GetTimeOffset();
-            }
-            else {
-                
-                IStereoSound* cursound = (IStereoSound*) currentsound;
-                timeleft = ((cursound->GetLeft())->GetTotalLength()) - 
-                    ((cursound->GetLeft())->GetTimeOffset());
-                float temp = ((cursound->GetRight())->GetTotalLength()) - 
-                    ((cursound->GetRight())->GetTimeOffset());
-                
-                if (temp < timeleft)
-                    timeleft = temp;
-            }
-            
-            if (timeleft <= tran->GetInTime()) {
-                starttime = (mytime->GetTime()).AsInt32();
-                if (random)
-                    RandomNext();
-                else
-                    Next();
-            }
+        if (switchToNextNumber) {
+            tran->InitFade(currentSound,
+                           playlist.at(nextTrackNumber));
+            tran->Start();
+            current = nextTrackNumber;
+            switchToNextNumber = false;
         }
-        
+
+        if (!tran->IsDone()) {
+            tran->Process();
+        }
+
+        /*        
         Vector<3, float> pos = cam->GetPosition();
-        
+
         //set the position of the current
         if (monoreftype && (typeid(*currentsound).name() ==  
                             typeid(*monoreftype).name())) {
@@ -217,7 +173,6 @@ void MusicPlayer::Handle(ProcessEventArg arg) {
             pos[0] = pos[0] + 1;
             right->SetPosition(pos);
         }
-        
         //set the position of the old if initialize
         if (monoreftype && (typeid(*previoussound).name() ==
                             typeid(*monoreftype).name())) {
@@ -233,6 +188,7 @@ void MusicPlayer::Handle(ProcessEventArg arg) {
             pos[0] = pos[0] + 1;
             right->SetPosition(pos);
         }
+        */
     }
 }
 

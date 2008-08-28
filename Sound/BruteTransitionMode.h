@@ -1,10 +1,18 @@
-
-
 #ifndef _SOUND_BRUTETRANSITIONMODE_H_
 #define _SOUND_BRUTETRANSITIONMODE_H_
 
 #include <Sound/ITransitionMode.h>
-#include <Sound/ISound.h>
+
+#include <Utils/Timer.h>
+
+namespace OpenEngine {
+    namespace Sound {
+        class ISound;
+    }
+}
+
+using OpenEngine::Utils::Time;
+using OpenEngine::Utils::Timer;
 
 namespace OpenEngine {
 namespace Sound {
@@ -15,20 +23,18 @@ private:
 	ISound* fromsound;
 	ISound* tosound;
 	bool done;
-	float intime, outtime;
+	Time intime, outtime;
+    Timer timer;
 
 public:
-    BruteTransitionMode(float newintime, float newouttime);
+    BruteTransitionMode(Time newintime, Time newouttime);
     ~BruteTransitionMode();
     void InitFade(ISound* from, ISound* to);
-    void SetInTime(float newintime);
-    float GetInTime();
-    void SetOutTime(float newouttime);
-    float GetOutTime();
-    void process(float deltatime);
-    bool isDone();
+    Time GetInTime();
+    Time GetOutTime();
+    void Process();
+    bool IsDone();
     void Start();
-
 };
 
 } // NS Sound
