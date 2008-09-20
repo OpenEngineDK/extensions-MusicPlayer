@@ -1,11 +1,10 @@
+SET( EXTENSION_NAME "Extensions_MusicPlayer")
 
-# Create the extension library
-ADD_LIBRARY(Extensions_MusicPlayer
+ADD_LIBRARY( ${EXTENSION_NAME}
   Sound/MusicPlayer.cpp
   Sound/BruteTransitionMode.cpp
 )
 
-TARGET_LINK_LIBRARIES(Extensions_MusicPlayer
+TARGET_LINK_LIBRARIES( ${EXTENSION_NAME}
   Extensions_OpenALSoundSystem
-  ${OPENAL_LIBRARY}
 )
