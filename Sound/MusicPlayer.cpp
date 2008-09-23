@@ -21,13 +21,31 @@ MusicPlayer::MusicPlayer(Camera* inicam, ISoundSystem* inisystem) {
 }
 
 MusicPlayer::~MusicPlayer() {
+    delete randGen;
 }
 
 void MusicPlayer::AddSound(string filename) {
 	ISoundResourcePtr resource =
         ResourceManager<ISoundResource>::Create(filename);
 	ISound* sound = system->CreateSound(resource);
-	playlist.push_back((ISound*) sound);
+    
+    // @todo: ugly cast only for testing
+    if (sound->IsStereoSound()) {
+        IMonoSound* left = ((IStereoSound*)sound)->GetLeft();
+        left->SetRelativePosition(true);
+        left->SetPosition(Vector<3,float>(-10.0,0.0,0.0));
+        
+        IMonoSound* right = ((IStereoSound*)sound)->GetRight();
+        right->SetRelativePosition(true);
+        right->SetPosition(Vector<3,float>(10.0,0.0,0.0));
+    }
+    else if (sound->IsMonoSound()) {
+        IMonoSound* mono = ((IMonoSound*)sound);
+        mono->SetRelativePosition(true);
+        mono->SetPosition(Vector<3,float>(0.0,0.0,0.0));
+    }
+    
+    playlist.push_back((ISound*) sound);
     sound->SetGain(gain);
 
     // if we are playing the last number and insert a new
@@ -155,7 +173,7 @@ void MusicPlayer::Handle(ProcessEventArg arg) {
             tran->Process();
         }
 
-        /*        
+        /*
         Vector<3, float> pos = cam->GetPosition();
 
         //set the position of the current
