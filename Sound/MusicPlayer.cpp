@@ -95,6 +95,7 @@ unsigned int MusicPlayer::NextNumber() {
 }
 
 void MusicPlayer::Previous() { 
+    if (playlist.size() == 0) return;
     if (random)
         SwitchTo(RandomNumber());
     else
@@ -102,6 +103,7 @@ void MusicPlayer::Previous() {
 }
 
 void MusicPlayer::Next() {
+    if (playlist.size() == 0) return;
     if (random)
         SwitchTo(RandomNumber());
     else
@@ -126,6 +128,7 @@ unsigned int MusicPlayer::NumberOfTracks() {
 }
 
 void MusicPlayer::Play() {
+    if (playlist.size() == 0) return;
     (playlist.at(current))->Play();
     stalled = false;
 }
