@@ -119,8 +119,8 @@ void MusicPlayer::SwitchTo(unsigned int trackNumber) {
         current = trackNumber;
         nextTrackNumber = NextNumber();
     }
-    logger.info << "Switching to song number: " << trackNumber+1;
-    logger.info << " out of " << NumberOfTracks() << logger.end;
+    // logger.info << "Switching to song number: " << trackNumber+1;
+    // logger.info << " out of " << NumberOfTracks() << logger.end;
 }
 
 unsigned int MusicPlayer::NumberOfTracks() {
