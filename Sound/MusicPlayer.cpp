@@ -25,8 +25,10 @@ MusicPlayer::~MusicPlayer() {
 }
 
 void MusicPlayer::AddSound(string filename) {
-	ISoundResourcePtr resource =
-        ResourceManager<ISoundResource>::Create(filename);
+    IStreamingSoundResourcePtr resource = 
+        ResourceManager<IStreamingSoundResource>::Create(filename);
+	// ISoundResourcePtr resource =
+    //     ResourceManager<ISoundResource>::Create(filename);
 	ISound* sound = system->CreateSound(resource);
     
     // @todo: ugly cast only for testing

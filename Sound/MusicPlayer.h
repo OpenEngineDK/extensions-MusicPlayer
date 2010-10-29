@@ -7,6 +7,7 @@
 #include <Display/Camera.h>
 #include <Math/RandomGenerator.h>
 #include <Resources/ISoundResource.h>
+#include <Resources/IStreamingSoundResource.h>
 #include <Resources/ResourceManager.h>
 #include <Sound/ISound.h>
 #include <Sound/ISoundSystem.h>
