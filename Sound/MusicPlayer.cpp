@@ -93,7 +93,8 @@ unsigned int MusicPlayer::PreviousNumber() {
 
 unsigned int MusicPlayer::NextNumber() {
     unsigned int switchTo = current+1;
-    return switchTo %= NumberOfTracks();
+    switchTo %= NumberOfTracks();
+    return switchTo;
 }
 
 void MusicPlayer::Previous() { 
