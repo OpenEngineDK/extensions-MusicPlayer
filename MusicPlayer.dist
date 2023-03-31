@@ -1,3 +1,3 @@
 # source
-git /extensions/MusicPlayer    https://github.com/OpenEngineDK/extensions-MusicPlayer.git
-git-dev /extensions/MusicPlayer    git@github.com:OpenEngineDK/extensions-MusicPlayer.git
+git /extensions/MusicPlayer    https://github.com/OpenEngineDK/extensions-MusicPlayer.git
+git-dev /extensions/MusicPlayer    git@github.com:OpenEngineDK/extensions-MusicPlayer.git
